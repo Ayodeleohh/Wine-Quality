@@ -1,0 +1,67 @@
+wine <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv ", header = TRUE, sep = ";")
+
+#Importing libraries
+library(rpart)
+library(gmodels)
+library(rpart.plot)
+library(caret)
+
+#Data exploration
+str(wine)
+table(wine$fixed.acidity)
+table(wine$density)
+summary(wine$alcohol)
+summary(wine$citric.acid)
+table(wine$quality)
+
+#Creating categories for wine quality
+wine$rank[wine$quality < 5] <- 'Bad'
+wine$rank[wine$quality > 6] <- 'Good'
+wine$rank[wine$quality == 6] <- 'Ok'
+wine$rank[wine$quality == 5] <- 'Ok'
+wine$rank <- factor(wine$rank)
+
+#Splitting Dataset into Training and Testing sets
+set.seed(123)
+train_sample <- sample(1599, 1119)
+str(train_sample)
+wine_train <- wine[train_sample, ]
+wine_test <- wine[-train_sample, ]
+prop.table(table(wine_train$quality))
+prop.table(table(wine_test$quality))
+prop.table(table(wine_train$rank))
+prop.table(table(wine_test$rank))
+
+#Training a model 
+wine_train$quality <- factor(wine_train$quality, levels = c(3, 4, 5, 6, 7, 8))
+tree <- rpart(formula = quality~ . -rank, data = wine_train, method= 'class')
+qual_pred <- predict(tree, newdata= wine_test[-12], type = "class")
+cm = table(wine_test[, 12], qual_pred)
+confusionMatrix(table(qual_pred, wine_test$quality))
+
+#Plotting Models
+plot(tree, uniform = T, main = "Wine Tree")
+text(tree, use.n = T, all = T)
+prp(tree)
+plot(qual_pred)
+summary(tree)
+summary(wine_train)
+summary(wine_test)
+table(wine_test$quality, qual_pred)
+
+
+#Evaluating Model
+CrossTable(wine_test$quality, wine_pred, prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE, dnn = c('actual quality', 'predicted quality'))
+CrossTable(wine_test$rank, wine_pred, prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE, dnn = c('actual quality', 'predicted quality'))
+
+#Tree Pruning
+min(tree$cptable[,"xerror"])
+which.min(tree$cptable[,"xerror"])
+tree.cp = tree$cptable[5,"CP"]
+prune.tree = prune(tree, cp= tree.cp)
+plot(prune.tree, margin= 0.1)
+text(prune.tree, all=TRUE , use.n=TRUE)
+
+predictions = predict(prune.tree, wine_test, type="class")
+table(wine_test$quality, predictions)
+confusionMatrix(table(predictions, wine_test$quality))
