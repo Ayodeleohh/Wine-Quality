@@ -6,11 +6,11 @@ Decision Tree
 Preprocessing:
 To begin working with the decision tree algorithm and wine dataset, I had to import the rpart, rpart.plot, caret and gmodels libraries to create and visualize the tree. 
 
-My next step was data exploration where I explored the wine dataset as shown below. The dataset includes 11 variables that are features of wine quality. 
+My next step was data exploration where I explored the wine dataset. The dataset includes 11 variables that are features of wine quality. 
 
 After looking at the features of the dataset I split my data into training and test sets, and examined the distribution of the quality amongst my new subsets. 
 
-I created the tree below that ranked wines without including the rank variable I created.
+I created the tree that ranked wines without including the rank variable I created.
 
 Summary: Here it’s visible my tree is split on alcohol, sulphates, and volatile acidity. Higher quality wines tend to have a higher percentage of alcohol and sulphates. The majority of wines in the training set were ranked as 5 or 6, or Okay in terms of my grouped ranking. 
 
