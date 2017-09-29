@@ -1,0 +1,60 @@
+win <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv ", header = TRUE, sep = ";")
+str(win)
+table(win$quality)
+
+# Encoding the target feature as factor
+win$quality = factor(win$quality, levels = c(3, 4, 5, 6, 7, 8))
+
+# Splitting the dataset into the Training set and Test set
+library(caTools)
+set.seed(123)
+split = sample.split(win$quality, SplitRatio = 0.70)
+training_set = subset(win, split == TRUE)
+test_set = subset(win, split == FALSE)
+
+# Fitting Random Forest Classification to the Training set
+library(randomForest)
+set.seed(123)
+classifier = randomForest(x = training_set[-12],
+                          y = training_set$quality,
+                          ntree = 5)
+
+#Plot OOB error
+error_df = data.frame(error_rate = classifier$err.rate[,'OOB'], num_trees = 1:classifier$ntree)
+ggplot(error_df, aes(x=num_trees, y=error_rate)) + geom_line()
+
+
+#500 Trees
+classifier500 = randomForest(x = training_set[-12],
+                          y = training_set$quality,
+                          ntree = 500)
+
+#Plot OOB Error
+error_df500 = data.frame(error_rate = classifier500$err.rate[,'OOB'], num_trees = 1:classifier500$ntree)
+ggplot(error_df500, aes(x=num_trees, y=error_rate)) + geom_line()
+
+#50 Trees
+classifier50 = randomForest(x = training_set[-12],
+                          y = training_set$quality,
+                          ntree = 50)
+#Plot OOB
+error_df50 = data.frame(error_rate = classifier50$err.rate[,'OOB'], num_trees = 1:classifier50$ntree)
+ggplot(error_df50, aes(x=num_trees, y=error_rate)) + geom_line()
+
+# Predicting the Test set results
+y_pred = predict(classifier, newdata = test_set[-12])
+
+# Making the Confusion Matrix
+cm = table(test_set[, 12], y_pred)
+
+win_df <- cbind(win, win_ = win[,'quality'])
+ggplot(data = error_df, aes(x=))
+
+#Random Forest with all 
+win_all <- randomForest(quality ~ win$fixed.acidity + win$volatile.acidity + win$citric.acid + win$residual.sugar + win$chlorides + win$free.sulfur.dioxide + win$total.sulfur.dioxide + win$density + win$pH + win$sulphates + win$alcohol, data= win, importance = TRUE)
+win_all
+varImpPlot(win_all, type = 1)
+varImpPlot(win_all, type = 2)
+
+
+
